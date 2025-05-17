@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم خدمات هکری | نسخه نهایی</title>
+    <style>
+        :root {
+            --hacker-green: #0f0;
+            --hacker-red: #f00;
+            --hacker-blue: #0af;
+            --bg-dark: #000;
+            --bg-darker: #020;
+            --font-large: 2.2rem;
+            --font-medium: 1.5rem;
+            --font-small: 1.2rem;
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--hacker-green);
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* افکت ماتریکس در پس زمینه */
+        .matrix-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        
+        /* اسکن لیزری */
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to bottom, transparent, var(--hacker-green), transparent);
+            animation: scan 4s linear infinite;
+            z-index: 2;
+            box-shadow: 0 0 10px var(--hacker-green);
+        }
+        
+        @keyframes scan {
+            0% { top: -100%; }
+            100% { top: 100%; }
+        }
+        
+        /* صفحه اصلی */
+        .main-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 3;
+            width: 100%;
+            padding: 20px;
+        }
+        
+        /* دکمه اصلی */
+        .main-btn {
+            background-color: rgba(0, 20, 0, 0.3);
+            color: var(--hacker-green);
+            border: 3px solid var(--hacker-green);
+            padding: 25px 50px;
+            font-size: var(--font-large);
+            cursor: pointer;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            z-index: 4;
+            transition: all 0.5s;
+            box-shadow: 0 0 25px var(--hacker-green),
+                        0 0 50px rgba(0, 255, 0, 0.3) inset;
+            margin-bottom: 50px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--hacker-green);
+            border-radius: 8px;
+            min-width: 400px;
+        }
+        
+        .main-btn:hover {
+            background-color: rgba(0, 255, 0, 0.15);
+            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--hacker-green),
+                        0 0 60px rgba(0, 255, 0, 0.4) inset;
+        }
+        
+        .main-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent 45%,
+                rgba(0, 255, 0, 0.1) 50%,
+                transparent 55%
+            );
+            animation: shine 3s infinite;
+            z-index: -1;
+        }
+        
+        @keyframes shine {
+            0% { transform: rotate(0deg) translate(-30%, -30%); }
+            100% { transform: rotate(360deg) translate(-30%, -30%); }
+        }
+        
+        /* اطلاعات نسخه */
+        .version-info {
+            color: rgba(0, 255, 0, 0.7);
+            font-size: 1rem;
+            margin-top: 30px;
+            text-shadow: 0 0 5px var(--hacker-green);
+            padding: 10px 20px;
+            border-top: 1px dashed rgba(0, 255, 0, 0.3);
+            border-bottom: 1px dashed rgba(0, 255, 0, 0.3);
+            letter-spacing: 1px;
+        }
+        
+        /* دکمه‌های خدمات */
+        .service-btn {
+            background-color: rgba(0, 20, 0, 0.3);
+            color: var(--hacker-green);
+            border: 2px solid var(--hacker-green);
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            min-width: 200px;
+            text-align: center;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+            display: inline-block;
+        }
+        
+        .service-btn:hover {
+            background-color: rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 20px var(--hacker-green);
+            transform: translateY(-3px);
+        }
+        
+        /* لیست خدمات */
+        .services-container {
+            display: none;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 90%;
+            max-width: 900px;
+            margin-top: 30px;
+            z-index: 3;
+        }
+        
+        /* فرم‌های سرویس */
+        .service-form {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 700px;
+            background-color: var(--bg-darker);
+            border: 3px solid var(--hacker-green);
+            padding: 30px;
+            z-index: 10;
+            box-shadow: 0 0 40px var(--hacker-green);
+            border-radius: 10px;
+        }
+        
+        .form-title {
+            color: var(--hacker-blue);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: var(--font-medium);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--hacker-green);
+            color: var(--hacker-green);
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+        }
+        
+        .form-submit {
+            background-color: transparent;
+            color: var(--hacker-green);
+            border: 2px solid var(--hacker-green);
+            padding: 10px 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .form-submit:hover {
+            background-color: rgba(0, 255, 0, 0.2);
+        }
+        
+        /* ترمینال خروجی */
+        .terminal-output {
+            background-color: var(--bg-dark);
+            border: 1px solid var(--hacker-green);
+            padding: 20px;
+            margin-top: 20px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .terminal-line {
+            margin: 5px 0;
+            color: var(--hacker-green);
+        }
+        
+        /* اطلاعات کاربر */
+        .user-info {
+            margin-top: 20px;
+            border-top: 1px dashed var(--hacker-green);
+            padding-top: 15px;
+        }
+        
+        .info-item {
+            margin: 8px 0;
+        }
+        
+        /* دکمه بازگشت */
+        .back-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: none;
+            border: none;
+            color: var(--hacker-red);
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- افکت ماتریکس در پس زمینه -->
+    <canvas id="matrix" class="matrix-bg"></canvas>
+    
+    <!-- خط اسکن -->
+    <div class="scan-line"></div>
+    
+    <!-- صفحه اصلی -->
+    <div class="main-page" id="mainPage">
+        <h1 style="color: var(--hacker-blue); text-shadow: 0 0 15px var(--hacker-blue); margin-bottom: 40px;">
+            سیستم خدمات امنیتی
+        </h1>
+        
+        <button class="main-btn" id="servicesBtn">
+            ENTER THE SYSTEM
+        </button>
+        
+        <div class="version-info">
+            نسخه 3.2.1 | توسعه یافته توسط تیم امنیتی
+        </div>
+        
+        <div class="services-container" id="servicesContainer">
+            <!-- دکمه‌های خدمات به صورت دینامیک اضافه می‌شوند -->
+        </div>
+    </div>
+    
+    <!-- فرم‌های سرویس -->
+    <div class="service-form" id="unblockForm">
+        <button class="back-btn" onclick="hideForm()">×</button>
+        <h2 class="form-title">رفع فیلترینگ</h2>
+        <p>لطفاً آی دی یا شماره خود را وارد کنید:</p>
+        <input type="text" class="form-input" id="unblockInput" placeholder="مثال: @username یا 09123456789">
+        <button class="form-submit" onclick="submitUnblock()">تایید اطلاعات</button>
+        <div class="terminal-output" id="unblockOutput" style="display: none;">
+            <div class="terminal-line">> سیستم در حال پردازش...</div>
+        </div>
+    </div>
+    
+    <div class="service-form" id="blockForm">
+        <button class="back-btn" onclick="hideForm()">×</button>
+        <h2 class="form-title">فیلترینگ اکانت</h2>
+        <p>لطفاً آی دی یا شماره مورد نظر را وارد کنید:</p>
+        <input type="text" class="form-input" id="blockInput" placeholder="مثال: @username یا 09123456789">
+        <button class="form-submit" onclick="submitBlock()">تایید اطلاعات</button>
+        <div class="terminal-output" id="blockOutput" style="display: none;">
+            <div class="terminal-line">> سیستم در حال پردازش...</div>
+        </div>
+    </div>
+    
+    <div class="service-form" id="channelBlockForm">
+        <button class="back-btn" onclick="hideForm()">×</button>
+        <h2 class="form-title">فیلترینگ چنل</h2>
+        <p>لطفاً آی دی چنل را وارد کنید:</p>
+        <input type="text" class="form-input" id="channelBlockInput" placeholder="مثال: @channelname">
+        <button class="form-submit" onclick="submitChannelBlock()">تایید اطلاعات</button>
+        <div class="terminal-output" id="channelBlockOutput" style="display: none;">
+            <div class="terminal-line">> سیستم در حال پردازش...</div>
+        </div>
+    </div>
+    
+    <div class="service-form" id="channelUnblockForm">
+        <button class="back-btn" onclick="hideForm()">×</button>
+        <h2 class="form-title">رفع فیلترینگ چنل</h2>
+        <p>لطفاً آی دی چنل را وارد کنید:</p>
+        <input type="text" class="form-input" id="channelUnblockInput" placeholder="مثال: @channelname">
+        <button class="form-submit" onclick="submitChannelUnblock()">تایید اطلاعات</button>
+        <div class="terminal-output" id="channelUnblockOutput" style="display: none;">
+            <div class="terminal-line">> سیستم در حال پردازش...</div>
+        </div>
+    </div>
+    
+    <div class="service-form" id="ripChatForm">
+        <button class="back-btn" onclick="hideForm()">×</button>
+        <h2 class="form-title">ریپ چتی</h2>
+        <p>لطفاً لینک گروه یا آی دی کاربر را وارد کنید:</p>
+        <input type="text" class="form-input" id="ripChatInput" placeholder="مثال: @groupname یا https://t.me/group">
+        <button class="form-submit" onclick="submitRipChat()">تایید اطلاعات</button>
+        <div class="terminal-output" id="ripChatOutput" style="display: none;">
+            <div class="terminal-line">> سیستم در حال پردازش...</div>
+        </div>
+    </div>
+    
+    <div class="service-form" id="hangiCodeForm">
+        <button class="back-btn" onclick="hideForm()">×</button>
+        <h2 class="form-title">کد هنگی</h2>
+        <p>لطفاً لینک گروه یا آی دی کاربر را وارد کنید:</p>
+        <input type="text" class="form-input" id="hangiCodeInput" placeholder="مثال: @groupname یا https://t.me/group">
+        <button class="form-submit" onclick="submitHangiCode()">تایید اطلاعات</button>
+        <div class="terminal-output" id="hangiCodeOutput" style="display: none;">
+            <div class="terminal-line">> سیستم در حال پردازش...</div>
+        </div>
+    </div>
+    
+    <div class="service-form" id="smsBomberForm">
+        <button class="back-btn" onclick="hideForm()">×</button>
+        <h2 class="form-title">اسمس بمبر</h2>
+        <p>لطفاً شماره موبایل مورد نظر را وارد کنید:</p>
+        <input type="text" class="form-input" id="smsBomberInput" placeholder="مثال: 09123456789">
+        <button class="form-submit" onclick="submitSmsBomber()">تایید اطلاعات</button>
+        <div class="terminal-output" id="smsBomberOutput" style="display: none;">
+            <div class="terminal-line">> سیستم در حال پردازش...</div>
+        </div>
+    </div>
+    
+    <div class="service-form" id="callBomberForm">
+        <button class="back-btn" onclick="hideForm()">×</button>
+        <h2 class="form-title">کال بمبر</h2>
+        <p>لطفاً شماره موبایل مورد نظر را وارد کنید:</p>
+        <input type="text" class="form-input" id="callBomberInput" placeholder="مثال: 09123456789">
+        <button class="form-submit" onclick="submitCallBomber()">تایید اطلاعات</button>
+        <div class="terminal-output" id="callBomberOutput" style="display: none;">
+            <div class="terminal-line">> سیستم در حال پردازش...</div>
+        </div>
+    </div>
+    
+    <div class="service-form" id="phoneInfoForm">
+        <button class="back-btn" onclick="hideForm()">×</button>
+        <h2 class="form-title">اطلاعات شماره همراه</h2>
+        <p>لطفاً شماره موبایل مورد نظر را وارد کنید:</p>
+        <input type="text" class="form-input" id="phoneInfoInput" placeholder="مثال: 09123456789">
+        <button class="form-submit" onclick="submitPhoneInfo()">تایید اطلاعات</button>
+        <div class="terminal-output" id="phoneInfoOutput" style="display: none;">
+            <div class="terminal-line">> سیستم در حال پردازش...</div>
+        </div>
+        <div class="user-info" id="userInfo" style="display: none;">
+            <h3>اطلاعات کاربر:</h3>
+            <div class="info-item">نام: <span id="userName"></span></div>
+            <div class="info-item">شهر: <span id="userCity"></span></div>
+            <div class="info-item">استان: <span id="userProvince"></span></div>
+            <div class="info-item">کد ملی: <span id="userNationalCode"></span></div>
+            <div class="info-item">اپراتور: <span id="userOperator"></span></div>
+        </div>
+    </div>
+
+    <script>
+        // ماتریکس پس‌زمینه
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+        const fontSize = 18;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+        
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.random() * -canvas.height;
+        }
+        
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0f0';
+            ctx.font = `bold ${fontSize}px monospace`;
+            
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                const x = i * fontSize;
+                const y = drops[i] * 1.2;
+                
+                ctx.fillText(text, x, y);
+                
+                if (y > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                
+                drops[i]++;
+            }
+        }
+        
+        setInterval(drawMatrix, 50);
+        
+        // نمایش دکمه‌های خدمات
+        function showServiceButtons() {
+            const services = [
+                {id: "unblock", name: "رفع فیلترینگ"},
+                {id: "block", name: "فیلترینگ اکانت"},
+                {id: "channelBlock", name: "فیلترینگ چنل"},
+                {id: "channelUnblock", name: "رفع فیلترینگ چنل"},
+                {id: "ripChat", name: "ریپ چتی"},
+                {id: "hangiCode", name: "کد هنگی"},
+                {id: "smsBomber", name: "اسمس بمبر"},
+                {id: "callBomber", name: "کال بمبر"},
+                {id: "phoneInfo", name: "اطلاعات شماره همراه"}
+            ];
+            
+            const container = document.getElementById('servicesContainer');
+            container.innerHTML = '';
+            
+            services.forEach(service => {
+                const btn = document.createElement('button');
+                btn.className = 'service-btn';
+                btn.textContent = service.name;
+                btn.onclick = () => showForm(service.id);
+                container.appendChild(btn);
+            });
+            
+            container.style.display = 'flex';
+            document.getElementById('servicesBtn').style.display = 'none';
+            
+            // اضافه کردن دکمه بازگشت
+            const backBtn = document.createElement('button');
+            backBtn.className = 'service-btn';
+            backBtn.textContent = 'بازگشت به صفحه اصلی';
+            backBtn.style.marginTop = '30px';
+            backBtn.style.background = 'rgba(255, 0, 0, 0.1)';
+            backBtn.style.borderColor = 'var(--hacker-red)';
+            backBtn.style.boxShadow = '0 0 10px var(--hacker-red)';
+            backBtn.onclick = () => {
+                container.style.display = 'none';
+                document.getElementById('servicesBtn').style.display = 'block';
+            };
+            container.appendChild(backBtn);
+        }
+        
+        // نمایش فرم سرویس
+        function showForm(serviceId) {
+            document.getElementById(serviceId + 'Form').style.display = 'block';
+            document.getElementById('servicesContainer').style.display = 'none';
+        }
+        
+        // مخفی کردن فرم
+        function hideForm() {
+            document.querySelectorAll('.service-form').forEach(form => {
+                form.style.display = 'none';
+            });
+            document.getElementById('servicesContainer').style.display = 'flex';
+        }
+        
+        // ارسال فرم‌ها
+        function submitUnblock() {
+            const input = document.getElementById('unblockInput').value;
+            if (!input) return;
+            
+            const output = document.getElementById('unblockOutput');
+            output.style.display = 'block';
+            
+            addTerminalLine(output, "> اطلاعات دریافت شد: " + input);
+            addTerminalLine(output, "> در حال ارسال به سرور...");
+            
+            setTimeout(() => {
+                addTerminalLine(output, "> اطلاعات با موفقیت به سرور ارسال شد");
+                addTerminalLine(output, "> فیلترینگ به زودی رفع خواهد شد");
+                addTerminalLine(output, "> کد پیگیری: " + Math.random().toString(36).substr(2, 8).toUpperCase());
+            }, 2000);
+        }
+        
+        function submitBlock() {
+            const input = document.getElementById('blockInput').value;
+            if (!input) return;
+            
+            const output = document.getElementById('blockOutput');
+            output.style.display = 'block';
+            
+            addTerminalLine(output, "> اطلاعات دریافت شد: " + input);
+            addTerminalLine(output, "> در حال ارسال به سرور...");
+            
+            setTimeout(() => {
+                addTerminalLine(output, "> اطلاعات با موفقیت به سرور ارسال شد");
+                addTerminalLine(output, "> اکانت مورد نظر به زودی فیلتر خواهد شد");
+                addTerminalLine(output, "> کد پیگیری: " + Math.random().toString(36).substr(2, 8).toUpperCase());
+            }, 2000);
+        }
+        
+        function submitChannelBlock() {
+            const input = document.getElementById('channelBlockInput').value;
+            if (!input) return;
+            
+            const output = document.getElementById('channelBlockOutput');
+            output.style.display = 'block';
+            
+            addTerminalLine(output, "> اطلاعات دریافت شد: " + input);
+            addTerminalLine(output, "> در حال ارسال به سرور...");
+            
+            setTimeout(() => {
+                addTerminalLine(output, "> اطلاعات با موفقیت به سرور ارسال شد");
+                addTerminalLine(output, "> چنل مورد نظر به زودی فیلتر خواهد شد");
+                addTerminalLine(output, "> کد پیگیری: " + Math.random().toString(36).substr(2, 8).toUpperCase());
+            }, 2000);
+        }
+        
+        function submitChannelUnblock() {
+            const input = document.getElementById('channelUnblockInput').value;
+            if (!input) return;
+            
+            const output = document.getElementById('channelUnblockOutput');
+            output.style.display = 'block';
+            
+            addTerminalLine(output, "> اطلاعات دریافت شد: " + input);
+            addTerminalLine(output, "> در حال ارسال به سرور...");
+            
+            setTimeout(() => {
+                addTerminalLine(output, "> اطلاعات با موفقیت به سرور ارسال شد");
+                addTerminalLine(output, "> فیلترینگ چنل به زودی رفع خواهد شد");
+                addTerminalLine(output, "> کد پیگیری: " + Math.random().toString(36).substr(2, 8).toUpperCase());
+            }, 2000);
+        }
+        
+        function submitRipChat() {
+            const input = document.getElementById('ripChatInput').value;
+            if (!input) return;
+            
+            const output = document.getElementById('ripChatOutput');
+            output.style.display = 'block';
+            
+            addTerminalLine(output, "> اطلاعات دریافت شد: " + input);
+            addTerminalLine(output, "> در حال اتصال به سرور چت...");
+            
+            setTimeout(() => {
+                addTerminalLine(output, "> اتصال برقرار شد");
+                addTerminalLine(output, "> در حال ریپ کردن چت...");
+                
+                setTimeout(() => {
+                    addTerminalLine(output, "> عملیات با موفقیت انجام شد");
+                    addTerminalLine(output, "> تمام پیام‌ها ریپ شده‌اند");
+                }, 2000);
+            }, 1500);
+        }
+        
+        function submitHangiCode() {
+            const input = document.getElementById('hangiCodeInput').value;
+            if (!input) return;
+            
+            const output = document.getElementById('hangiCodeOutput');
+            output.style.display = 'block';
+            
+            addTerminalLine(output, "> اطلاعات دریافت شد: " + input);
+            addTerminalLine(output, "> در حال تولید کد هنگی...");
+            
+            setTimeout(() => {
+                addTerminalLine(output, "> کد هنگی تولید شد: HNG-" + Math.random().toString(36).substr(2, 6).toUpperCase());
+                addTerminalLine(output, "> در حال ارسال کد به گروه...");
+                
+                setTimeout(() => {
+                    addTerminalLine(output, "> کد با موفقیت ارسال شد");
+                    addTerminalLine(output, "> گروه در حال هنگی شدن...");
+                }, 1500);
+            }, 2000);
+        }
+        
+        function submitSmsBomber() {
+            const input = document.getElementById('smsBomberInput').value;
+            if (!input) return;
+            
+            const output = document.getElementById('smsBomberOutput');
+            output.style.display = 'block';
+            
+            addTerminalLine(output, "> شماره دریافت شد: " + input);
+            addTerminalLine(output, "> در حال راه‌اندازی بمبار...");
+            
+            let count = 0;
+            const bomberInterval = setInterval(() => {
+                count++;
+                addTerminalLine(output, "> SMS ارسال شده به " + input + " (تعداد: " + count + ")");
+                
+                if (count >= 15) {
+                    clearInterval(bomberInterval);
+                    addTerminalLine(output, "> بمبار SMS تکمیل شد");
+                    addTerminalLine(output, "> تعداد کل SMS ارسالی: " + count);
+                }
+            }, 500);
+        }
+        
+        function submitCallBomber() {
+            const input = document.getElementById('callBomberInput').value;
+            if (!input) return;
+            
+            const output = document.getElementById('callBomberOutput');
+            output.style.display = 'block';
+            
+            addTerminalLine(output, "> شماره دریافت شد: " + input);
+            addTerminalLine(output, "> در حال راه‌اندازی بمبار...");
+            
+            let count = 0;
+            const bomberInterval = setInterval(() => {
+                count++;
+                addTerminalLine(output, "> تماس برقرار شده با " + input + " (تعداد: " + count + ")");
+                
+                if (count >= 10) {
+                    clearInterval(bomberInterval);
+                    addTerminalLine(output, "> بمبار تماس تکمیل شد");
+                    addTerminalLine(output, "> تعداد کل تماس‌ها: " + count);
+                }
+            }, 800);
+        }
+        
+        function submitPhoneInfo() {
+            const input = document.getElementById('phoneInfoInput').value;
+            if (!input) return;
+            
+            const output = document.getElementById('phoneInfoOutput');
+            const userInfo = document.getElementById('userInfo');
+            
+            output.style.display = 'block';
+            
+            addTerminalLine(output, "> شماره دریافت شد: " + input);
+            addTerminalLine(output, "> در حال جستجوی اطلاعات...");
+            
+            setTimeout(() => {
+                addTerminalLine(output, "> اطلاعات یافت شد");
+                addTerminalLine(output, "> در حال نمایش اطلاعات کاربر...");
+                
+                // اطلاعات رندوم
+                const names = ["محمد حسینی", "علی محمدی", "رضا احمدی", "فاطمه زهرا کریمی", "سارا موسوی"];
+                const cities = ["تهران", "مشهد", "اصفهان", "شیراز", "تبریز"];
+                const provinces = ["تهران", "خراسان رضوی", "اصفهان", "فارس", "آذربایجان شرقی"];
+                const operators = ["همراه اول", "ایرانسل", "رایتل"];
+                
+                document.getElementById('userName').textContent = names[Math.floor(Math.random() * names.length)];
+                document.getElementById('userCity').textContent = cities[Math.floor(Math.random() * cities.length)];
+                document.getElementById('userProvince').textContent = provinces[Math.floor(Math.random() * provinces.length)];
+                document.getElementById('userNationalCode').textContent = Math.floor(1000000000 + Math.random() * 9000000000);
+                document.getElementById('userOperator').textContent = operators[Math.floor(Math.random() * operators.length)];
+                
+                userInfo.style.display = 'block';
+            }, 2500);
+        }
+        
+        // اضافه کردن خط به ترمینال
+        function addTerminalLine(terminal, text) {
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.textContent = text;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        // پاسخ به تغییر سایز پنجره
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // رویداد کلیک دکمه اصلی
+        document.getElementById('servicesBtn').addEventListener('click', showServiceButtons);
+    </script>
+</body>
+</html>
